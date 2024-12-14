@@ -23,7 +23,7 @@ COPY --from=builder /tgbot/requirements.txt .
 
 RUN pip install --no-cache /wheels/*
 
-COPY . .
+COPY src .
 
 RUN groupadd -r user && useradd -r -g user user
 RUN chown user . 

@@ -1,0 +1,10 @@
+**/*.pyc
+**/.git
+**/.gitignore
+**/.vscode
+**/.env
+**/.ssh
+**/venv
+README.md
+docker-compose.yml
+*.dockerfile
