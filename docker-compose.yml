@@ -1,0 +1,61 @@
+services: 
+  postgres:
+    container_name: tg_db
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - tg_db:/var/lib/postgresql/data
+      - .:/docker-entrypoint-initdb.d
+    networks:
+      - tg_bot_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:7.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: ${PGADMIN_CONFIG_SERVER_MODE}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_HOST_PORT}:80"
+    restart: unless-stopped
+    networks:
+      - tg_bot_net
+
+  tg_bot:
+    container_name: tg_bot
+    image: tg:bot
+    build:
+      context: .
+      dockerfile: tg_bot.dockerfile
+    environment:
+      TOKEN: ${TOKEN}
+      HOST: ${HOST} 
+      PORT: ${PORT} 
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - tg_bot_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+
+volumes:
+  tg_db:
+  pgadmin-data:
+
+networks:
+  tg_bot_net:
+    driver: bridge
