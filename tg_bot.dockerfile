@@ -20,9 +20,10 @@ WORKDIR /tgbot
 
 COPY --from=builder /tgbot/wheels /wheels
 COPY --from=builder /tgbot/requirements.txt .
-COPY . .
 
 RUN pip install --no-cache /wheels/*
+
+COPY . .
 
 RUN groupadd -r user && useradd -r -g user user
 RUN chown user . 
